@@ -7,8 +7,16 @@
     <meta charset="UTF-8">
     <title>Train Scheduler</title>
 
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="style.css">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Firebase Reference -->
+    <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase.js"></script>
+    <!-- Moment.js Reference -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
 
 </head>
 
@@ -22,9 +30,9 @@
         <!-- Jumbotron -->
         <div class="jumbotron">
             <h1 class="text-center">Train Scheduler</h1>
-            <h2 class="text-center">I Choo Choo-se You!</h2>
+            <h2 class="text-center">I choo choo-se you!</h2>
         </div>
-        <table class="table">
+        <table class="table" id="trainTable">
             <thead>
                 <tr>
                     <th scope="col">Train Name</th>
@@ -60,26 +68,18 @@
                                 <input class="form-control" id="destination-input" type="text">
                             </div>
                             <div class="form-group row">
-                                <label for="start-time-input">First Train Time (HH:mm - military time)</label>
-                                <input class="form-control" id="start-time-input" type="time">
+                                <label for="start-time-input">First Train Time</label>
+                                <input class="form-control" id="start-time-input" type="text" placeholder="HH:mm - military time">
                             </div>
                             <div class="form-group row">
                                 <label for="frequency-input">Frequency (min)</label>
                                 <input class="form-control" id="frequency-input" type="number">
                             </div>
-                            <button class="btn btn-default" id="add-train" type="submit">Submit</button>
+                            <button class="btn btn-default" id="submit" type="submit">Submit</button>
                         </form>
                     </div>
                 </div>
             </div>
-
-            <!-- jQuery -->
-            <script src="https://code.jquery.com/jquery.js"></script>
-
-            <!-- Firebase Reference -->
-            <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase.js"></script>
-            <!-- Moment.js Reference -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
 
             <!-- Script -->
             <script>
@@ -88,7 +88,7 @@
                     authDomain: "train-scheduler-ba2c0.firebaseapp.com",
                     databaseURL: "https://train-scheduler-ba2c0.firebaseio.com",
                     projectId: "train-scheduler-ba2c0",
-                    storageBucket: "train-scheduler-ba2c0.appspot.com",
+                    storageBucket: "", //"train-scheduler-ba2c0.appspot.com",
                     messagingSenderId: "503243241418"
                 };
                 firebase.initializeApp(config);
@@ -99,64 +99,111 @@
                     event.preventDefault();
 
                     // Capture User Inputs and store into variables
-                    var name = $("#name-input").val().trim();
-                    var destination = $("#destination-input").val().trim();
-                    var startTime = $("#start-time-input").val().trim();
-                    var frequency = $("#frequency-input").val().trim();
-                    // Console log each of the user inputs to confirm we are receiving them
-                    console.log(name);
-                    console.log(destination);
-                    console.log(startTime);
-                    console.log(frequency);
-
-
+                    var nameTrain = $("#name-input").val().trim();
+                    var destinationTrain = $("#destination-input").val().trim();
+                    var startTime = moment($("#start-time-input").val().trim(), "HH:mm").format("");
+                    var frequencyTrain = $("#frequency-input").val().trim();
 
                     database.ref().push({
-                        name: name,
-                        destination: destination,
+                        name: nameTrain,
+                        destination: destinationTrain,
                         startTime: startTime,
-                        rate: rate,
+                        frequency: frequencyTrain,
 
                     });
 
-                    //Firebase water .on("child-added"
-                    database.ref().on("child_added", function (snapshot) {
-                        var sv = snapshot.val();
+                    console.log(nameTrain);
+                    console.log(destinationTrain);
+                    console.log(startTime);
+                    console.log(frequencyTrain);
 
-                        console.log(sv.name);
-                        console.log(sv.destination);
-                        console.log(sv.startTime);
-                        //console.log(sv.months);
-                        console.log(sv.frequency);
-                        //console.log(sv.totalBilled);
+                    $("#name-input").val("");
+                    $("#destination-input").val("");
+                    $("#start-time-input").val("");
+                    $("#frequency-input").val("");
 
-                        var hours = moment().diff(moment(sv.startTime).format("HH:mm"), "hours");
-                        var minutesAway = (timeAdd * sv.frequency);
+                    var firstTimeConvert = moment(startTime, "HH:mm").subtract(1, "years"); // MomentJS
+                    console.log(firstTimeConvert);
 
-                        var newRow = $("<tr>");
-                        newRow.append("<td>" + sv.name + "</td>");
-                        newRow.append("<td>" + sv.destination + "</td>");
-                        newRow.append("<td>" + sv.startTime + "</td>");
-                        newRow.append("<td>" + sv.frequency + "</td>");
-                        newRow.append("<td></td>");
+                    // Current time using MomentJS
+                    var currentTime = moment(); // MomentJS
+                    console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm")); // MomentJS
 
-                        $("#dataOutput").append(newRow);
+                    // Difference between the times
+                    var diffTime = moment().diff(moment(firstTimeConvert), "minutes"); // MomentJS
+                    console.log("DIFFERENCE IN TIME: " + diffTime);
 
-                    });
-                    // Handle the errors
+                    // Time apart (remainder)
+                    var tRemainder = diffTime % frequencyTrain;
+                    console.log(tRemainder);
 
+                    // Minute until train arrives
+                    var tMinutesTillTrain = frequencyTrain - tRemainder;
+                    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
 
-                    /*dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
-                      // Change the HTML to reflect
-                      $("#name-display").text(snapshot.val().name);
-                      $("#role-display").text(snapshot.val().role);
-                      $("#start-display").text(snapshot.val().start);
-                      $("#months-display").text(snapshot.val().months);
-                      $("#rate-display").text(snapshot.val().rate);
-                      $("#total-billed-display").text(snapshot.val().totalBilled);
+                    // Next train
+                    var nextTrain = moment().add(tMinutesTillTrain, "minutes"); // MomentJS
+                    var nextTrainConvert = moment(nextTrain).format("hh:mm a"); // MomentJS
+                    console.log("ARRIVAL TIME: " + moment(nextTrain).format("HH:mm")); // MomentJS
 
-                    });*/
+                    // Add each trains data into the HTML table
+                    $("#train-table > tbody").append("<tr><td>" + nameTrain + "</td><td>" + destinationTrain +
+                        "</td><td>" + "Every " + frequencyTrain + " minutes" + "</td><td>" +
+                        nextTrainConvert + "</td><td>" + tMinutesTillTrain + "</td></tr>");
                 });
+
+                database.ref().on("child_added", function (childSnapshot) {
+                    console.log(childSnapshot.val());
+
+                    var nameTrain = childSnapshot.val().name;
+                    var destinationTrain = childSnapshot.val().destination;
+                    var startTime = childSnapshot.val().first;
+                    var trainFreq = childSnapshot.val().freq;
+
+                    console.log(trainName);
+                    console.log(trainDestination);
+                    console.log(firstTrain);
+                    console.log(frequencyTrain);
+                });
+
+                /*
+                //Firebase water .on("child-added"
+                database.ref().on("child_added", function (snapshot) {
+                var sv = snapshot.val();
+
+                console.log(sv.nameTrain);
+                console.log(sv.destinationTrain);
+                console.log(sv.startTime);
+                //console.log(sv.months);
+                console.log(sv.frequencyTrain);
+                //console.log(sv.totalBilled);
+
+                var hours = moment().diff(moment(sv.startTime).format("HH:mm"), "hours");
+                var minutesAway = (timeAdd * sv.frequencyTrain);
+
+                var newRow = $("<tr>");
+                newRow.append("<td>" + sv.nameTrain + "</td>");
+                newRow.append("<td>" + sv.destinationTrain + "</td>");
+                newRow.append("<td>" + sv.startTime + "</td>");
+                newRow.append("<td>" + sv.frequencyTrain + "</td>");
+                newRow.append("<td></td>");
+
+                $("#dataOutput").append(newRow);
+
+                });
+                // Handle the errors
+
+
+                dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+                  // Change the HTML to reflect
+                  $("#name-display").text(snapshot.val().name);
+                  $("#role-display").text(snapshot.val().role);
+                  $("#start-display").text(snapshot.val().start);
+                  $("#months-display").text(snapshot.val().months);
+                  $("#rate-display").text(snapshot.val().rate);
+                  $("#total-billed-display").text(snapshot.val().totalBilled);
+
+                });*/
             </script>
 
 </body>
