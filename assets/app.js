@@ -78,7 +78,7 @@ database.ref().on("child_added", function (childSnapshot) {
     console.log("Arrival Time: " + moment(nextTrain).format("HH:mm")); 
 
     // Add trains to the HTML table
-    $("#train-table > tbody").append("<tr><td>" + nameTrain + "</td><td>" + destinationTrain +
+    $("#train-table > tbody").prepend("<tr><td>" + nameTrain + "</td><td>" + destinationTrain +
         "</td><td>" + "Every " + frequencyTrain + " minutes" + "</td><td>" +
         nextTrainConvert + "</td><td>" + minutesTillTrain + "</td></tr>");
 });
