@@ -6,13 +6,10 @@
 
     <meta charset="UTF-8">
     <title>Train Scheduler</title>
-
     <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="assets/style.css">
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery.js"></script>
     <!-- Firebase Reference -->
     <script src="https://www.gstatic.com/firebasejs/5.5.7/firebase.js"></script>
     <!-- Moment.js Reference -->
@@ -29,25 +26,9 @@
 
         <!-- Jumbotron -->
         <div class="jumbotron">
-            <h1 class="text-center">Train Scheduler</h1>
+            <h1 class="text-center">The Incredible Train Scheduling Machine</h1>
             <h2 class="text-center">I choo choo-se you!</h2>
         </div>
-        <table class="table" id="trainTable">
-            <thead>
-                <tr>
-                    <th scope="col">Train Name</th>
-                    <th scope="col">Destination</th>
-                    <th scope="col">Frequency (min)</th>
-                    <th scope="col">Next Arrival</th>
-                    <th scope="col">Minutes Away</th>
-                    <!-- <th scope="col">Total Billed ($)</th>-->
-                </tr>
-            </thead>
-            <tbody id="dataOutput">
-
-            </tbody>
-        </table>
-
         <div class="row">
 
             <!-- Sign-Up Card-->
@@ -75,136 +56,32 @@
                                 <label for="frequency-input">Frequency (min)</label>
                                 <input class="form-control" id="frequency-input" type="number">
                             </div>
-                            <button class="btn btn-default" id="submit" type="submit">Submit</button>
+                            <button class="btn btn-default" id="add-train" type="submit">Submit</button>
                         </form>
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <table class="table" id="train-table">
+            <thead>
+                <tr>
+                    <th scope="col">Train Name</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Frequency (min)</th>
+                    <th scope="col">Next Arrival</th>
+                    <th scope="col">Minutes Away</th>
+                    <!-- <th scope="col">Total Billed ($)</th>-->
+                </tr>
+            </thead>
+            <tbody>
 
-            <!-- Script -->
-            <script>
-                var config = {
-                    apiKey: "AIzaSyBS-O5aWS2epcROYLl6V1x6oaQg61aL2O0",
-                    authDomain: "train-scheduler-ba2c0.firebaseapp.com",
-                    databaseURL: "https://train-scheduler-ba2c0.firebaseio.com",
-                    projectId: "train-scheduler-ba2c0",
-                    storageBucket: "", //"train-scheduler-ba2c0.appspot.com",
-                    messagingSenderId: "503243241418"
-                };
-                firebase.initializeApp(config);
-                var database = firebase.database();
+            </tbody>
+        </table>
 
-                // Capture Button Click
-                $("#add-train").on("click", function (event) {
-                    event.preventDefault();
-
-                    // Capture User Inputs and store into variables
-                    var nameTrain = $("#name-input").val().trim();
-                    var destinationTrain = $("#destination-input").val().trim();
-                    var startTime = moment($("#start-time-input").val().trim(), "HH:mm").format("");
-                    var frequencyTrain = $("#frequency-input").val().trim();
-
-                    database.ref().push({
-                        name: nameTrain,
-                        destination: destinationTrain,
-                        startTime: startTime,
-                        frequency: frequencyTrain,
-
-                    });
-
-                    console.log(nameTrain);
-                    console.log(destinationTrain);
-                    console.log(startTime);
-                    console.log(frequencyTrain);
-
-                    $("#name-input").val("");
-                    $("#destination-input").val("");
-                    $("#start-time-input").val("");
-                    $("#frequency-input").val("");
-
-                    var firstTimeConvert = moment(startTime, "HH:mm").subtract(1, "years"); // MomentJS
-                    console.log(firstTimeConvert);
-
-                    // Current time using MomentJS
-                    var currentTime = moment(); // MomentJS
-                    console.log("CURRENT TIME: " + moment(currentTime).format("HH:mm")); // MomentJS
-
-                    // Difference between the times
-                    var diffTime = moment().diff(moment(firstTimeConvert), "minutes"); // MomentJS
-                    console.log("DIFFERENCE IN TIME: " + diffTime);
-
-                    // Time apart (remainder)
-                    var tRemainder = diffTime % frequencyTrain;
-                    console.log(tRemainder);
-
-                    // Minute until train arrives
-                    var tMinutesTillTrain = frequencyTrain - tRemainder;
-                    console.log("MINUTES TILL TRAIN: " + tMinutesTillTrain);
-
-                    // Next train
-                    var nextTrain = moment().add(tMinutesTillTrain, "minutes"); // MomentJS
-                    var nextTrainConvert = moment(nextTrain).format("hh:mm a"); // MomentJS
-                    console.log("ARRIVAL TIME: " + moment(nextTrain).format("HH:mm")); // MomentJS
-
-                    // Add each trains data into the HTML table
-                    $("#train-table > tbody").append("<tr><td>" + nameTrain + "</td><td>" + destinationTrain +
-                        "</td><td>" + "Every " + frequencyTrain + " minutes" + "</td><td>" +
-                        nextTrainConvert + "</td><td>" + tMinutesTillTrain + "</td></tr>");
-                });
-
-                database.ref().on("child_added", function (childSnapshot) {
-                    console.log(childSnapshot.val());
-
-                    var nameTrain = childSnapshot.val().name;
-                    var destinationTrain = childSnapshot.val().destination;
-                    var startTime = childSnapshot.val().first;
-                    var trainFreq = childSnapshot.val().freq;
-
-                    console.log(trainName);
-                    console.log(trainDestination);
-                    console.log(firstTrain);
-                    console.log(frequencyTrain);
-                });
-
-                /*
-                //Firebase water .on("child-added"
-                database.ref().on("child_added", function (snapshot) {
-                var sv = snapshot.val();
-
-                console.log(sv.nameTrain);
-                console.log(sv.destinationTrain);
-                console.log(sv.startTime);
-                //console.log(sv.months);
-                console.log(sv.frequencyTrain);
-                //console.log(sv.totalBilled);
-
-                var hours = moment().diff(moment(sv.startTime).format("HH:mm"), "hours");
-                var minutesAway = (timeAdd * sv.frequencyTrain);
-
-                var newRow = $("<tr>");
-                newRow.append("<td>" + sv.nameTrain + "</td>");
-                newRow.append("<td>" + sv.destinationTrain + "</td>");
-                newRow.append("<td>" + sv.startTime + "</td>");
-                newRow.append("<td>" + sv.frequencyTrain + "</td>");
-                newRow.append("<td></td>");
-
-                $("#dataOutput").append(newRow);
-
-                });
-                // Handle the errors
-
-
-                dataRef.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
-                  // Change the HTML to reflect
-                  $("#name-display").text(snapshot.val().name);
-                  $("#role-display").text(snapshot.val().role);
-                  $("#start-display").text(snapshot.val().start);
-                  $("#months-display").text(snapshot.val().months);
-                  $("#rate-display").text(snapshot.val().rate);
-                  $("#total-billed-display").text(snapshot.val().totalBilled);
-
-                });*/
-            </script>
+        
+            <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+            <script src="assets/app.js"></script>
 
 </body>
 
