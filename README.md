@@ -1,4 +1,4 @@
-# The Incredible Train Scheduling Machine
+# [The Incredible Train Scheduling Machine](https://cdgillis.github.io/train-scheduler/)
 
 ---
 
