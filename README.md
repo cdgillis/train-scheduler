@@ -9,7 +9,7 @@ You must specify the following:
 * time the first train departed
 * frequency of the train
 
-Upon hitting the "Submit" button, the app will display the results at the top of the list. All historical train routes created are listed in sequence below, with the newest train route at the top and the oldest at the bottom.
+Upon hitting the **Submit** button, the app will display the results at the top of the list. All historical train routes created are listed in sequence below, with the newest train route at the top and the oldest at the bottom.
 
 Enjoy!
-- cdgillis
+-*cdgillis*
