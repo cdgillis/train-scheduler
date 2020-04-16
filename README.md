@@ -1,7 +1,5 @@
 # [The Incredible Train Scheduling Machine](https://cdgillis.github.io/train-scheduler/)
 
----
-
 #### *Find out when the next train is arriving!*
 
 Create your own train route and the app will tell you when the next train is scheduled to arrive. 
